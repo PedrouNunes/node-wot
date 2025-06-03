@@ -71,14 +71,36 @@ async function main() {
 
     const thing = await WoT.produce(td);
 
-    // Teste de recursos
     let availableResourceLevel = 3;
     let maintenanceNeeded = false;
     const possibleDrinks = ["espresso", "cappuccino", "latte"];
+    const LOW_RESOURCE_THRESHOLD = 2;
+    let lowAlreadyWarned = false;
 
     thing.setPropertyReadHandler("availableResourceLevel", async () => availableResourceLevel);
     thing.setPropertyReadHandler("possibleDrinks", async () => possibleDrinks);
     thing.setPropertyReadHandler("maintenanceNeeded", async () => maintenanceNeeded);
+
+    function checkResourceLevel() {
+      thing.notifyPropertyChange("availableResourceLevel");
+
+      if (availableResourceLevel <= LOW_RESOURCE_THRESHOLD && availableResourceLevel > 0 && !lowAlreadyWarned) {
+        console.log("⚠️ Nível abaixo do limiar! Emitindo evento.");
+        thing.emitEvent("outOfResource", `Low resource level: ${availableResourceLevel}`);
+        lowAlreadyWarned = true;
+      }
+
+      if (availableResourceLevel > LOW_RESOURCE_THRESHOLD) {
+        lowAlreadyWarned = false;
+      }
+
+      if (availableResourceLevel === 0 && !maintenanceNeeded) {
+        maintenanceNeeded = true;
+        thing.notifyPropertyChange("maintenanceNeeded");
+        console.log("🔧 Manutenção necessária.");
+        thing.emitEvent("outOfResource", "No water available!");
+      }
+    }
 
     thing.setActionHandler("makeDrink", async (drink) => {
       console.log(`☕ Pedido recebido: ${drink}`);
@@ -96,14 +118,8 @@ async function main() {
       }
 
       availableResourceLevel--;
-      thing.notifyPropertyChange("availableResourceLevel");
       console.log(`📉 Novo nível: ${availableResourceLevel}`);
-
-      if (availableResourceLevel === 0) {
-        maintenanceNeeded = true;
-        thing.notifyPropertyChange("maintenanceNeeded");
-        console.log("🔧 Manutenção necessária.");
-      }
+      checkResourceLevel();
 
       return `✅ ${drink} served!`;
     });

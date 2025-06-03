@@ -58,9 +58,25 @@ const rl = readline.createInterface({
     console.log(`🚨 Evento recebido [outOfResource]: ${data}`);
   });
 
+  function startAutoMode() {
+    const drinks = ["espresso", "latte", "cappuccino"];
+    console.log("🤖 Modo automático ativado (aperte Ctrl+C para parar)\n");
+
+    setInterval(async () => {
+      const drink = drinks[Math.floor(Math.random() * drinks.length)];
+      try {
+        console.log(`🤖 [Auto] Solicitando: ${drink}`);
+        const result = await thing.invokeAction("makeDrink", drink);
+        console.log(`✅ [Auto] ${result}`);
+      } catch (err) {
+        console.error(`[Auto] Erro ao fazer bebida: ${err.message}`);
+      }
+    }, 5000);
+  }
+
   function askUser() {
     rl.question(
-      "\nEscolha uma opção:\n1 - Fazer uma bebida\n0 - Sair\nSua escolha: ",
+      "\nEscolha uma opção:\n1 - Fazer uma bebida\n2 - Modo automático\n0 - Sair\nSua escolha: ",
       async (choice) => {
         if (choice === "1") {
           rl.question("Qual bebida deseja? ", async (drink) => {
@@ -73,6 +89,8 @@ const rl = readline.createInterface({
             }
             askUser();
           });
+        } else if (choice === "2") {
+          startAutoMode();
         } else if (choice === "0") {
           console.log("[Consumer] Encerrando...");
           rl.close();
