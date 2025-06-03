@@ -114,7 +114,7 @@ async function main() {
       if (availableResourceLevel <= 0) {
         console.log("🔥 Emitting event: outOfResource");
         thing.emitEvent("outOfResource", "No water available!");
-        return "❌ No water to make drink!";
+        return "❌ No water to make drinks!";
       }
 
       availableResourceLevel--;
