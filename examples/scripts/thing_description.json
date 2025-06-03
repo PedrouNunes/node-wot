@@ -1,0 +1,105 @@
+{
+  "@context": [
+    "https://www.w3.org/2019/wot/td/v1",
+    "https://www.w3.org/2022/wot/td/v1.1",
+    {
+      "@language": "en"
+    }
+  ],
+  "@type": "Thing",
+  "id": "urn:dev:wot:coffee-machine",
+  "title": "CoffeeMachine",
+  "securityDefinitions": {
+    "nosec_sc": {
+      "scheme": "nosec"
+    }
+  },
+  "security": ["nosec_sc"],
+  "properties": {
+    "ingredients": {
+      "type": "object",
+      "readOnly": true,
+      "observable": true,
+      "properties": {
+        "water": { "type": "integer" },
+        "coffee": { "type": "integer" },
+        "milk": { "type": "integer" }
+      },
+      "forms": [
+        {
+          "href": "mqtt://test.mosquitto.org/CoffeeMachine/properties/ingredients",
+          "contentType": "application/json",
+          "op": ["readproperty", "observeproperty"]
+        }
+      ]
+    },
+    "maintenanceNeeded": {
+      "type": "boolean",
+      "readOnly": true,
+      "forms": [
+        {
+          "href": "mqtt://test.mosquitto.org/CoffeeMachine/properties/maintenanceNeeded",
+          "contentType": "application/json",
+          "op": ["readproperty"]
+        }
+      ]
+    }
+  },
+  "actions": {
+    "makeDrink": {
+      "input": {
+        "type": "string"
+      },
+      "forms": [
+        {
+          "href": "mqtt://test.mosquitto.org/CoffeeMachine/actions/makeDrink",
+          "contentType": "application/json",
+          "op": ["invokeaction"]
+        }
+      ]
+    },
+    "addIngredient": {
+      "input": {
+        "type": "object",
+        "properties": {
+          "ingredient": { "type": "string" },
+          "quantity": { "type": "integer" }
+        },
+        "required": ["ingredient", "quantity"]
+      },
+      "forms": [
+        {
+          "href": "mqtt://test.mosquitto.org/CoffeeMachine/actions/addIngredient",
+          "contentType": "application/json",
+          "op": ["invokeaction"]
+        }
+      ]
+    }
+  },
+  "events": {
+    "lowIngredient": {
+      "data": {
+        "type": "string"
+      },
+      "forms": [
+        {
+          "href": "mqtt://test.mosquitto.org/CoffeeMachine/events/lowIngredient",
+          "contentType": "application/json",
+          "op": ["subscribeevent"]
+        }
+      ]
+    },
+    "outOfResource": {
+      "data": {
+        "type": "string"
+      },
+      "forms": [
+        {
+          "href": "mqtt://test.mosquitto.org/CoffeeMachine/events/outOfResource",
+          "contentType": "application/json",
+          "op": ["subscribeevent"]
+        }
+      ]
+    }
+  }
+}
